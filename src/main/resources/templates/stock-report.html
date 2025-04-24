@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Stok Raporu</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">Stok Takip Sistemi</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/"><i class="fas fa-home"></i> Ana Sayfa</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/products"><i class="fas fa-box"></i> Ürünler</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/categories"><i class="fas fa-tags"></i> Kategoriler</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/reports/stock"><i class="fas fa-chart-bar"></i> Raporlar</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4">Stok Raporu</h1>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card text-white bg-danger">
+                    <div class="card-header">
+                        <h5><i class="fas fa-exclamation-triangle"></i> Kritik Stok Seviyesi</h5>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="card-title" th:text="${lowStockProducts.size()}">0</h2>
+                        <p class="card-text">Stok seviyesi 10'un altında olan ürün sayısı</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card text-white bg-primary">
+                    <div class="card-header">
+                        <h5><i class="fas fa-box"></i> Toplam Ürün</h5>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="card-title" th:text="${products.size()}">0</h2>
+                        <p class="card-text">Sistemde kayıtlı toplam ürün sayısı</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card text-white bg-success">
+                    <div class="card-header">
+                        <h5><i class="fas fa-money-bill"></i> Toplam Değer</h5>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="card-title" th:with="total=${#aggregates.sum(products.![price * quantity])}" 
+                            th:text="${#numbers.formatDecimal(total, 1, 2) + ' TL'}">0 TL</h2>
+                        <p class="card-text">Envanterdeki ürünlerin toplam değeri</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-warning">
+                <h5><i class="fas fa-exclamation-circle"></i> Kritik Stok Seviyesindeki Ürünler (10'dan az)</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Ürün Adı</th>
+                                <th>Kategori</th>
+                                <th>Mevcut Stok</th>
+                                <th>Birim Fiyat</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="product : ${lowStockProducts}">
+                                <td th:text="${product.name}"></td>
+                                <td th:text="${product.category}"></td>
+                                <td><span class="badge badge-danger" th:text="${product.quantity}"></span></td>
+                                <td th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' TL'}"></td>
+                                <td>
+                                    <a th:href="@{/products/edit/{id}(id=${product.id})}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i> Düzenle
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${lowStockProducts.empty}">
+                                <td colspan="5" class="text-center">Kritik stok seviyesinde ürün yok</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-list"></i> Tüm Stok Listesi</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Ürün Adı</th>
+                                <th>Kategori</th>
+                                <th>Stok</th>
+                                <th>Birim Fiyat</th>
+                                <th>Toplam Değer</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="product : ${products}">
+                                <td th:text="${product.name}"></td>
+                                <td th:text="${product.category}"></td>
+                                <td>
+                                    <span th:class="${product.quantity < 10 ? 'badge badge-danger' : 'badge badge-success'}" 
+                                          th:text="${product.quantity}"></span>
+                                </td>
+                                <td th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' TL'}"></td>
+                                <td th:text="${#numbers.formatDecimal(product.price * product.quantity, 1, 2) + ' TL'}"></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-info">
+                                <th colspan="4" class="text-right">Toplam Envanter Değeri:</th>
+                                <th th:with="total=${#aggregates.sum(products.![price * quantity])}" 
+                                    th:text="${#numbers.formatDecimal(total, 1, 2) + ' TL'}"></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html> 
