@@ -145,4 +145,10 @@ public class WebController {
         });
         return "redirect:/products";
     }
+
+    // Erişim reddedildi sayfası
+    @GetMapping("/access-denied")
+    public String accessDenied() {
+        return "access-denied";
+    }
 } 
