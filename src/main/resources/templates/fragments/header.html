@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <!-- Header fragment tanımı -->
+    <div th:fragment="header" class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">Stok Takip Sistemi</a>
+            
+            <!-- Navbar içeriği -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- Navigation linkler burada -->
+                
+                <!-- Kullanıcı profil ve çıkış bölümü -->
+                <div class="navbar-nav ml-auto">
+                    <div sec:authorize="isAuthenticated()">
+                        <span class="nav-item nav-link text-light mr-3">
+                            Merhaba, <span sec:authentication="name"></span>
+                        </span>
+                        <a th:href="@{/profile}" class="btn btn-outline-light mr-2">Profilim</a>
+                        <form th:action="@{/logout}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-light">Çıkış Yap</button>
+                        </form>
+                    </div>
+                    <div sec:authorize="!isAuthenticated()">
+                        <a th:href="@{/login}" class="btn btn-outline-light">Giriş Yap</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

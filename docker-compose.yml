@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: stocktracking-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: IcPGpJOO0UpsyaW
+      MYSQL_DATABASE: stocktrackingsystem
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - stocktracking-network
+
+  app:
+    build: .
+    container_name: stocktracking-app
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/stocktrackingsystem?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: IcPGpJOO0UpsyaW
+    ports:
+      - "8089:8089"
+    networks:
+      - stocktracking-network
+
+networks:
+  stocktracking-network:
+    driver: bridge
+
+volumes:
+  mysql-data: 
