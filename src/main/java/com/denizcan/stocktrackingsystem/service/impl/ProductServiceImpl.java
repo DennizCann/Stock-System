@@ -4,7 +4,6 @@ import com.denizcan.stocktrackingsystem.model.Product;
 import com.denizcan.stocktrackingsystem.repository.ProductRepository;
 import com.denizcan.stocktrackingsystem.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -111,11 +110,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> findProductsByCategory(String categoryName) {
-        return productRepository.findByCategoryName(categoryName);
-    }
-
-    @Override
     public List<Product> findProductsBelowQuantity(Integer quantity) {
         return productRepository.findByQuantityLessThan(quantity);
     }
@@ -123,11 +117,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Product> findProductsInPriceRange(Double minPrice, Double maxPrice) {
         return productRepository.findByPriceBetween(minPrice, maxPrice);
-    }
-
-    @Override
-    public List<Product> findLowStockProducts(int limit) {
-        return productRepository.findLowStockProducts(PageRequest.of(0, limit));
     }
 
     @Override
