@@ -28,4 +28,8 @@ public class Category {
     @JsonIgnore // Sonsuz döngüyü önlemek için
     private List<Product> products = new ArrayList<>();
 
+    @Override
+    public String toString() {
+        return name; // ID yerine kategori ismini döndür
+    }
 } 

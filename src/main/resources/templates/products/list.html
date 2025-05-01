@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
 </head>
 <body>
+    <!-- Üst Navigasyon Çubuğu -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="navbar-brand" href="/">Stok Takip Sistemi</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
@@ -27,6 +28,14 @@
                     <a class="nav-link" href="/reports/stock"><i class="fas fa-chart-bar"></i> Raporlar</a>
                 </li>
             </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/profile"><i class="fas fa-user"></i> Profil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
+                </li>
+            </ul>
         </div>
     </nav>
 
@@ -37,90 +46,102 @@
                 <i class="fas fa-plus"></i> Yeni Ürün Ekle
             </a>
         </div>
-        
+
+        <!-- Filtreleme Formu -->
         <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <i class="fas fa-filter"></i> Filtrele
+            </div>
             <div class="card-body">
-                <form th:action="@{/products}" method="get" class="row">
-                    <div class="col-md-3 mb-2">
-                        <input type="text" name="keyword" class="form-control" placeholder="Ürün adı ara..." 
-                               th:value="${param.keyword}">
+                <form method="get" action="/products" class="form-row">
+                    <div class="form-group col-md-4">
+                        <label for="keyword">Arama:</label>
+                        <input type="text" class="form-control" id="keyword" name="keyword" th:value="${param.keyword}" placeholder="Ürün adı veya açıklama">
                     </div>
-                    <div class="col-md-3 mb-2">
-                        <select name="category" class="form-control">
-                            <option value="">-- Kategori Seçin --</option>
-                            <option th:each="cat : ${allCategories}"
+                    <div class="form-group col-md-3">
+                        <label for="category">Kategori:</label>
+                        <select class="form-control" id="category" name="category">
+                            <option value="">Tümü</option>
+                            <option th:each="cat : ${allCategories}" 
                                     th:value="${cat.name}" 
                                     th:text="${cat.name}"
                                     th:selected="${param.category != null && param.category[0] == cat.name}">
+                                Kategori Adı
                             </option>
                         </select>
                     </div>
-                    <div class="col-md-2 mb-2">
-                        <select name="stockStatus" class="form-control">
-                            <option value="">-- Stok Durumu --</option>
-                            <option value="low" th:selected="${param.stockStatus != null && param.stockStatus[0] == 'low'}">Kritik Stok (10-)</option>
-                            <option value="normal" th:selected="${param.stockStatus != null && param.stockStatus[0] == 'normal'}">Normal Stok (10+)</option>
+                    <div class="form-group col-md-3">
+                        <label for="stockStatus">Stok Durumu:</label>
+                        <select class="form-control" id="stockStatus" name="stockStatus">
+                            <option value="">Tümü</option>
+                            <option value="low" th:selected="${param.stockStatus != null && param.stockStatus[0] == 'low'}">Kritik Seviye (< 10)</option>
+                            <option value="normal" th:selected="${param.stockStatus != null && param.stockStatus[0] == 'normal'}">Normal Seviye (≥ 10)</option>
                         </select>
                     </div>
-                    <div class="col-md-4 mb-2">
+                    <div class="form-group col-md-2 d-flex align-items-end">
                         <button type="submit" class="btn btn-primary mr-2">
-                            <i class="fas fa-search"></i> Filtrele
+                            <i class="fas fa-search"></i> Ara
                         </button>
-                        <a th:href="@{/products}" class="btn btn-outline-secondary">
-                            <i class="fas fa-sync"></i> Sıfırla
+                        <a href="/products" class="btn btn-secondary">
+                            <i class="fas fa-sync-alt"></i> Sıfırla
                         </a>
                     </div>
                 </form>
             </div>
         </div>
-        
+
+        <!-- Ürün Tablosu -->
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead class="thead-dark">
                             <tr>
-                                <th>ID</th>
+                                <th>#</th>
                                 <th>Ürün Adı</th>
                                 <th>Kategori</th>
-                                <th>Miktar</th>
+                                <th>Stok</th>
                                 <th>Fiyat</th>
                                 <th>Açıklama</th>
                                 <th>İşlemler</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="product : ${products}">
-                                <td th:text="${product.id}"></td>
-                                <td th:text="${product.name}"></td>
-                                <td th:text="${product.category != null ? product.category : 'Kategori Yok'}">Kategori</td>
+                            <tr th:each="product, stats : ${products}">
+                                <td th:text="${stats.count}">1</td>
+                                <td th:text="${product.name}">Ürün Adı</td>
+                                <td th:text="${product.category != null ? product.category.name : 'Kategori Yok'}">Kategori</td>
                                 <td>
                                     <span th:class="${product.quantity < 10 ? 'badge badge-danger' : 'badge badge-success'}" 
-                                          th:text="${product.quantity}"></span>
+                                          th:text="${product.quantity}">0</span>
                                 </td>
-                                <td th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' TL'}"></td>
-                                <td th:text="${product.description}"></td>
+                                <td th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' TL'}">0.00 TL</td>
+                                <td th:text="${product.description}">Açıklama</td>
                                 <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <a th:href="@{/products/edit/{id}(id=${product.id})}" class="btn btn-info">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a th:href="@{/products/edit/{id}(id=${product.id})}" class="btn btn-primary"
+                                           title="Düzenle">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <a th:href="@{/products/delete/{id}(id=${product.id})}" class="btn btn-danger"
+                                           title="Sil"
                                            onclick="return confirm('Bu ürünü silmek istediğinize emin misiniz?')">
                                             <i class="fas fa-trash"></i>
                                         </a>
-                                        <a th:href="@{/products/stock/{id}/decrease(id=${product.id})}" class="btn btn-warning" 
+                                        <a th:href="@{/products/stock/{id}/decrease(id=${product.id})}" class="btn btn-warning"
+                                           title="Stok Azalt"
                                            th:if="${product.quantity > 0}">
                                             <i class="fas fa-minus"></i>
                                         </a>
-                                        <a th:href="@{/products/stock/{id}/increase(id=${product.id})}" class="btn btn-success">
+                                        <a th:href="@{/products/stock/{id}/increase(id=${product.id})}" class="btn btn-success"
+                                           title="Stok Artır">
                                             <i class="fas fa-plus"></i>
                                         </a>
                                     </div>
                                 </td>
                             </tr>
                             <tr th:if="${products.empty}">
-                                <td colspan="7" class="text-center">Henüz hiç ürün eklenmemiş</td>
+                                <td colspan="7" class="text-center">Hiç ürün bulunamadı</td>
                             </tr>
                         </tbody>
                     </table>

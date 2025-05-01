@@ -54,51 +54,18 @@ public class WebController {
 
     // Ürün listesi sayfası - filtreleme ile
     @GetMapping("/products")
-    public String productList(Model model, 
-                             @RequestParam(required = false) String keyword,
-                             @RequestParam(required = false) String category,
-                             @RequestParam(required = false) String stockStatus) {
-        
-        List<Product> filteredProducts;
-        
-        // Filtre yoksa tüm ürünleri getir
-        if (keyword == null && category == null && stockStatus == null) {
-            filteredProducts = productService.getAllProducts();
+    public String listProducts(Model model) {
+        try {
+            List<Product> products = productService.getAllProducts();
+            List<Category> categories = categoryService.getAllCategories();
+            
+            model.addAttribute("products", products);
+            model.addAttribute("allCategories", categories);
+            return "product-list"; // Doğru şablon adının kullanıldığından emin olun
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "error";
         }
-        // Filtre varsa uygun şekilde filtrele
-        else {
-            filteredProducts = productService.getAllProducts();
-            
-            // Anahtar kelimeye göre filtrele
-            if (keyword != null && !keyword.isEmpty()) {
-                filteredProducts = filteredProducts.stream()
-                    .filter(p -> p.getName().toLowerCase().contains(keyword.toLowerCase()) ||
-                           (p.getDescription() != null && p.getDescription().toLowerCase().contains(keyword.toLowerCase())))
-                    .collect(Collectors.toList());
-            }
-            
-            // Kategoriye göre filtrele
-            if (category != null && !category.isEmpty()) {
-                filteredProducts = filteredProducts.stream()
-                    .filter(p -> category.equals(p.getCategory()))
-                    .collect(Collectors.toList());
-            }
-            
-            // Stok durumuna göre filtrele
-            if ("low".equals(stockStatus)) {
-                filteredProducts = filteredProducts.stream()
-                    .filter(p -> p.getQuantity() < 10)
-                    .collect(Collectors.toList());
-            } else if ("normal".equals(stockStatus)) {
-                filteredProducts = filteredProducts.stream()
-                    .filter(p -> p.getQuantity() >= 10)
-                    .collect(Collectors.toList());
-            }
-        }
-        
-        model.addAttribute("products", filteredProducts);
-        model.addAttribute("allCategories", categoryService.getAllCategories());
-        return "product-list";
     }
 
     // Ürün ekleme sayfası

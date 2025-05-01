@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 import java.util.Map;
@@ -19,8 +20,21 @@ public class DataMigrationRunner implements CommandLineRunner {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Value("${app.data-migration.enabled:false}")
+    private boolean migrationEnabled;
+
     @Override
     public void run(String... args) {
+        if (!migrationEnabled) {
+            return; // Veri taşıma devre dışıysa hiçbir şey yapma
+        }
+
+        // Veri tabanında otomatik kategori oluşumunu önlemek için kontrol ekliyoruz
+        if (categoryRepository.findByName("10").isPresent()) {
+            // Eğer "10" adlı kategori zaten varsa, hiçbir şey yapma
+            return;
+        }
+
         // Eski tablodan String kategorileri kontrol et
         try {
             // Önce sütunun var olup olmadığını kontrol et
@@ -57,6 +71,20 @@ public class DataMigrationRunner implements CommandLineRunner {
                         category.getId(), categoryName);
                 }
             }
+
+            // Otomatik kategori oluşturma kodunu bul ve koşullu hale getir
+            // Örneğin aşağıdaki gibi bir if kontrolü ekleyebilirsiniz:
+            
+            boolean migrationNeeded = false; // Bu değeri uygun bir koşulla belirleyin
+            
+            if (migrationNeeded) {
+                // Sadece gerektiğinde kategori oluştur
+                Category newCategory = new Category();
+                newCategory.setName("10");
+                newCategory.setDescription("Otomatik oluşturuldu");
+                categoryRepository.save(newCategory);
+            }
+            
         } catch (Exception e) {
             System.out.println("Veri geçişi sırasında hata: " + e.getMessage());
             e.printStackTrace();
