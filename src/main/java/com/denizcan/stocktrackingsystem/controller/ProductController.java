@@ -2,10 +2,13 @@ package com.denizcan.stocktrackingsystem.controller;
 
 import com.denizcan.stocktrackingsystem.model.Product;
 import com.denizcan.stocktrackingsystem.service.ProductService;
+import com.denizcan.stocktrackingsystem.repository.ProductRepository;
+import com.denizcan.stocktrackingsystem.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.ui.Model;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,10 +18,14 @@ import java.util.Optional;
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
     @Autowired
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productService = productService;
+        this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     // Tüm ürünleri getir
@@ -103,5 +110,20 @@ public class ProductController {
     public ResponseEntity<Double> calculateInventoryValueByCategory(@PathVariable String category) {
         Double value = productService.calculateInventoryValueByCategory(category);
         return new ResponseEntity<>(value != null ? value : 0.0, HttpStatus.OK);
+    }
+
+    // Ürün formu için kategorileri getir
+    @GetMapping("/products/add")
+    public String showAddProductForm(Model model) {
+        model.addAttribute("product", new Product());
+        model.addAttribute("categories", categoryRepository.findAll()); // Tüm kategorileri gönder
+        return "add-product";
+    }
+    
+    @PostMapping("/products/add")
+    public String addProduct(@ModelAttribute Product product) {
+        // Kategori ID'si product nesnesinde zaten ayarlanmış olmalı
+        productRepository.save(product);
+        return "redirect:/products";
     }
 } 

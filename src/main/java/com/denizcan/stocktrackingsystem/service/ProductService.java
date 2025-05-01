@@ -20,7 +20,7 @@ public interface ProductService {
     // Arama ve filtreleme işlemleri
     List<Product> findProductsByName(String name);
     
-    List<Product> findProductsByCategory(String category);
+    List<Product> findProductsByCategory(String categoryName);
     
     List<Product> findProductsBelowQuantity(Integer quantity);
     
@@ -30,5 +30,5 @@ public interface ProductService {
     List<Product> findLowStockProducts(int limit);
     
     // Kategoriye göre envanter değeri hesaplama
-    Double calculateInventoryValueByCategory(String category);
+    Double calculateInventoryValueByCategory(String categoryName);
 } 

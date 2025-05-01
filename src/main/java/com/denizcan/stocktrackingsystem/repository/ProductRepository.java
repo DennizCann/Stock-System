@@ -1,6 +1,7 @@
 package com.denizcan.stocktrackingsystem.repository;
 
 import com.denizcan.stocktrackingsystem.model.Product;
+import com.denizcan.stocktrackingsystem.model.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -13,9 +14,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // Ürünleri isme göre arama
     List<Product> findByNameContainingIgnoreCase(String name);
     
-    // Ürünleri kategoriye göre arama
-    List<Product> findByCategory(String category);
-    
     // Belirli bir stok miktarından az olan ürünleri bulma
     List<Product> findByQuantityLessThan(Integer quantity);
     
@@ -26,7 +24,23 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE p.quantity > 0 ORDER BY p.quantity ASC")
     List<Product> findLowStockProducts(org.springframework.data.domain.Pageable pageable);
     
-    // Belirli bir kategorideki toplam stok değerini hesaplama
-    @Query("SELECT SUM(p.price * p.quantity) FROM Product p WHERE p.category = :category")
-    Double calculateTotalInventoryValueByCategory(String category);
+    // Kategoriye göre ürün bulma - Category nesnesi ile
+    @Query(value = "SELECT * FROM product WHERE category_id = :#{#category.id}", nativeQuery = true)
+    List<Product> findByCategory(Category category);
+    
+    // Kategori ID'sine göre ürün bulma - native SQL ile
+    @Query(value = "SELECT * FROM product WHERE category_id = :categoryId", nativeQuery = true)
+    List<Product> findByCategoryId(Long categoryId);
+
+    // Kategori adına göre ürün bulma - native SQL sorgusu ile
+    @Query(value = "SELECT * FROM product p JOIN category c ON p.category_id = c.id WHERE c.name = :categoryName", nativeQuery = true)
+    List<Product> findByCategoryName(String categoryName);
+    
+    // Belirli bir kategorideki toplam stok değerini hesaplama - Kategori nesnesine göre
+    @Query(value = "SELECT SUM(price * quantity) FROM product WHERE category_id = :#{#category.id}", nativeQuery = true)
+    Double calculateInventoryValueByCategory(Category category);
+    
+    // Belirli bir kategorideki toplam stok değerini hesaplama - Kategori adına göre
+    @Query(value = "SELECT SUM(p.price * p.quantity) FROM product p JOIN category c ON p.category_id = c.id WHERE c.name = :categoryName", nativeQuery = true)
+    Double calculateInventoryValueByCategoryName(String categoryName);
 } 

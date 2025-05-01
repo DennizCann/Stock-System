@@ -1,9 +1,13 @@
 package com.denizcan.stocktrackingsystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -18,5 +22,10 @@ public class Category {
     private String name;
     
     private String description;
+    
+    // Bu kategori altındaki ürünler (isteğe bağlı)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @JsonIgnore // Sonsuz döngüyü önlemek için
+    private List<Product> products = new ArrayList<>();
 
 } 

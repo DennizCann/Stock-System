@@ -51,8 +51,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> findProductsByCategory(String category) {
-        return productRepository.findByCategory(category);
+    public List<Product> findProductsByCategory(String categoryName) {
+        return productRepository.findByCategoryName(categoryName);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Double calculateInventoryValueByCategory(String category) {
-        return productRepository.calculateTotalInventoryValueByCategory(category);
+    public Double calculateInventoryValueByCategory(String categoryName) {
+        return productRepository.calculateInventoryValueByCategoryName(categoryName);
     }
 } 
