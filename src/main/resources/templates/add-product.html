@@ -38,7 +38,7 @@
                         <h4><i class="fas fa-plus-circle"></i> Yeni Ürün Ekle</h4>
                     </div>
                     <div class="card-body">
-                        <form th:action="@{/products/add}" th:object="${product}" method="post">
+                        <form th:action="@{/products/save}" th:object="${product}" method="post">
                             <div class="form-group">
                                 <label for="name">Ürün Adı</label>
                                 <input type="text" class="form-control" id="name" th:field="*{name}" required>

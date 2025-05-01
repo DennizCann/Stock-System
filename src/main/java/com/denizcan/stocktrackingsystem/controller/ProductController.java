@@ -1,20 +1,20 @@
 package com.denizcan.stocktrackingsystem.controller;
 
 import com.denizcan.stocktrackingsystem.model.Product;
+import com.denizcan.stocktrackingsystem.model.Category;
 import com.denizcan.stocktrackingsystem.service.ProductService;
 import com.denizcan.stocktrackingsystem.repository.ProductRepository;
 import com.denizcan.stocktrackingsystem.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 
-@RestController
-@RequestMapping("/api/products")
+@Controller
 public class ProductController {
 
     private final ProductService productService;
@@ -28,91 +28,78 @@ public class ProductController {
         this.categoryRepository = categoryRepository;
     }
 
-    // Tüm ürünleri getir
-    @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
-        return new ResponseEntity<>(products, HttpStatus.OK);
-    }
-
-    // ID'ye göre ürün getir
-    @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
-        Optional<Product> product = productService.getProductById(id);
-        return product.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    // Yeni ürün ekle
-    @PostMapping
-    public ResponseEntity<Product> saveProduct(@RequestBody Product product) {
-        Product savedProduct = productService.saveProduct(product);
-        return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
-    }
-
-    // Ürün güncelle
-    @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
-        Optional<Product> existingProduct = productService.getProductById(id);
-        if (existingProduct.isPresent()) {
-            product.setId(id);
-            Product updatedProduct = productService.updateProduct(product);
-            return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
+    @GetMapping("/products")
+    public String listProducts(Model model, @RequestParam(required = false) String keyword,
+                             @RequestParam(required = false) String category, 
+                             @RequestParam(required = false) String stockStatus) {
+        // Mevcut ürünleri getir - burada filtreleme için geçici çözüm
+        List<Product> products;
+        
+        if (keyword != null || category != null || stockStatus != null) {
+            // Bu metot henüz tanımlanmamış, geçici olarak başka metodu kullanalım
+            products = productService.getAllProducts(); // Tüm ürünleri al
+            
+            // Sonra manuel filtreleme yapalım
+            List<Product> filteredProducts = new ArrayList<>();
+            for (Product product : products) {
+                boolean matches = true;
+                
+                // Anahtar kelime filtresi
+                if (keyword != null && !keyword.isEmpty()) {
+                    matches = product.getName() != null && 
+                              product.getName().toLowerCase().contains(keyword.toLowerCase());
+                }
+                
+                // Kategori filtresi
+                if (matches && category != null && !category.isEmpty() && !category.equals("-- Kategori Seçin --")) {
+                    matches = product.getCategory() != null && 
+                              product.getCategory().toString().equals(category);
+                }
+                
+                // Stok durum filtresi
+                if (matches && stockStatus != null && !stockStatus.isEmpty() && !stockStatus.equals("-- Stok Durumu --")) {
+                    if (stockStatus.equals("low")) {
+                        matches = product.getQuantity() < 10; // Kritik stok seviyesi
+                    } else if (stockStatus.equals("inStock")) {
+                        matches = product.getQuantity() > 0; // Stokta var
+                    } else if (stockStatus.equals("outOfStock")) {
+                        matches = product.getQuantity() <= 0; // Stokta yok
+                    }
+                }
+                
+                if (matches) {
+                    filteredProducts.add(product);
+                }
+            }
+            
+            products = filteredProducts;
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            products = productService.getAllProducts();
         }
-    }
-
-    // Ürün sil
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        Optional<Product> existingProduct = productService.getProductById(id);
-        if (existingProduct.isPresent()) {
-            productService.deleteProduct(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        
+        // Kategori isimlerini ayarla
+        for (Product product : products) {
+            if (product.getCategory() != null) {
+                try {
+                    // Eğer kategori bir ID ise
+                    Long categoryId = Long.valueOf(product.getCategory().toString());
+                    // Doğrudan repository kullan
+                    Optional<Category> categoryOpt = categoryRepository.findById(categoryId);
+                    if (categoryOpt.isPresent()) {
+                        // Kategori nesnesinden ismi al ve ayarla
+                        product.setCategory(categoryOpt.get().getName());
+                    }
+                } catch (NumberFormatException e) {
+                    // Zaten string ise birşey yapma
+                }
+            }
         }
+        
+        model.addAttribute("products", products);
+        model.addAttribute("allCategories", categoryRepository.findAll());
+        return "product-list";
     }
 
-    // İsme göre ürün ara
-    @GetMapping("/search")
-    public ResponseEntity<List<Product>> findProductsByName(@RequestParam String name) {
-        List<Product> products = productService.findProductsByName(name);
-        return new ResponseEntity<>(products, HttpStatus.OK);
-    }
-
-    // Kategoriye göre ürün filtrele
-    @GetMapping("/category/{category}")
-    public ResponseEntity<List<Product>> findProductsByCategory(@PathVariable String category) {
-        List<Product> products = productService.findProductsByCategory(category);
-        return new ResponseEntity<>(products, HttpStatus.OK);
-    }
-
-    // Kritik stok seviyesindeki ürünleri getir
-    @GetMapping("/low-stock")
-    public ResponseEntity<List<Product>> findLowStockProducts(@RequestParam(defaultValue = "5") int limit) {
-        List<Product> products = productService.findLowStockProducts(limit);
-        return new ResponseEntity<>(products, HttpStatus.OK);
-    }
-
-    // Fiyat aralığına göre ürünleri getir
-    @GetMapping("/price-range")
-    public ResponseEntity<List<Product>> findProductsInPriceRange(
-            @RequestParam Double minPrice, 
-            @RequestParam Double maxPrice) {
-        List<Product> products = productService.findProductsInPriceRange(minPrice, maxPrice);
-        return new ResponseEntity<>(products, HttpStatus.OK);
-    }
-
-    // Belirli bir kategorinin toplam envanter değerini hesapla
-    @GetMapping("/inventory-value/{category}")
-    public ResponseEntity<Double> calculateInventoryValueByCategory(@PathVariable String category) {
-        Double value = productService.calculateInventoryValueByCategory(category);
-        return new ResponseEntity<>(value != null ? value : 0.0, HttpStatus.OK);
-    }
-
-    // Ürün formu için kategorileri getir
     @GetMapping("/products/add")
     public String showAddProductForm(Model model) {
         model.addAttribute("product", new Product());
@@ -120,7 +107,7 @@ public class ProductController {
         return "add-product";
     }
     
-    @PostMapping("/products/add")
+    @PostMapping("/products/save")
     public String addProduct(@ModelAttribute Product product) {
         // Kategori ID'si product nesnesinde zaten ayarlanmış olmalı
         productRepository.save(product);

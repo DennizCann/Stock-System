@@ -72,19 +72,6 @@ public class DataMigrationRunner implements CommandLineRunner {
                 }
             }
 
-            // Otomatik kategori oluşturma kodunu bul ve koşullu hale getir
-            // Örneğin aşağıdaki gibi bir if kontrolü ekleyebilirsiniz:
-            
-            boolean migrationNeeded = false; // Bu değeri uygun bir koşulla belirleyin
-            
-            if (migrationNeeded) {
-                // Sadece gerektiğinde kategori oluştur
-                Category newCategory = new Category();
-                newCategory.setName("10");
-                newCategory.setDescription("Otomatik oluşturuldu");
-                categoryRepository.save(newCategory);
-            }
-            
         } catch (Exception e) {
             System.out.println("Veri geçişi sırasında hata: " + e.getMessage());
             e.printStackTrace();

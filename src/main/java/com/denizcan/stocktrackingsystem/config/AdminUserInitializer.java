@@ -17,7 +17,7 @@ public class AdminUserInitializer implements CommandLineRunner {
     private PasswordEncoder passwordEncoder;
     
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         // Admin kullanıcısının varlığını kontrol et
         if (userRepository.findByUsername("admin").isEmpty()) {
             User adminUser = new User();

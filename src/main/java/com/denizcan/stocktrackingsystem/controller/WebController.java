@@ -9,7 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.ArrayList;
 
 @Controller
@@ -50,38 +49,6 @@ public class WebController {
             // Alternatif olarak ürünler sayfasına yönlendir
             return "redirect:/products";
         }
-    }
-
-    // Ürün listesi sayfası - filtreleme ile
-    @GetMapping("/products")
-    public String listProducts(Model model) {
-        try {
-            List<Product> products = productService.getAllProducts();
-            List<Category> categories = categoryService.getAllCategories();
-            
-            model.addAttribute("products", products);
-            model.addAttribute("allCategories", categories);
-            return "product-list"; // Doğru şablon adının kullanıldığından emin olun
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "error";
-        }
-    }
-
-    // Ürün ekleme sayfası
-    @GetMapping("/products/add")
-    public String showAddProductForm(Model model) {
-        model.addAttribute("product", new Product());
-        model.addAttribute("categories", categoryService.getAllCategories());
-        return "add-product";
-    }
-
-    // Ürün ekleme işlemi
-    @PostMapping("/products/add")
-    public String addProduct(@ModelAttribute Product product) {
-        // Form gönderildiğinde ürünü doğrudan kaydet
-        productService.saveProduct(product);
-        return "redirect:/products";
     }
 
     // Ürün düzenleme sayfası
