@@ -43,4 +43,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // Belirli bir kategorideki toplam stok değerini hesaplama - Kategori adına göre
     @Query(value = "SELECT SUM(p.price * p.quantity) FROM product p JOIN category c ON p.category_id = c.id WHERE c.name = :categoryName", nativeQuery = true)
     Double calculateInventoryValueByCategoryName(String categoryName);
+
+    @Query("SELECT p.id FROM Product p")
+    List<Long> findAllIds();
 } 

@@ -109,8 +109,7 @@ public class ProductController {
     
     @PostMapping("/products/save")
     public String addProduct(@ModelAttribute Product product) {
-        // Kategori ID'si product nesnesinde zaten ayarlanmış olmalı
-        productRepository.save(product);
+        productService.saveProduct(product);
         return "redirect:/products";
     }
 } 
