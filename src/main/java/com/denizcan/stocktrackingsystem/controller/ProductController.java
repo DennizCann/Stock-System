@@ -18,13 +18,11 @@ import java.util.ArrayList;
 public class ProductController {
 
     private final ProductService productService;
-    private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
     @Autowired
     public ProductController(ProductService productService, ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productService = productService;
-        this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
     }
 

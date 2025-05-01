@@ -19,15 +19,10 @@ public interface ProductService {
     
     // Arama ve filtreleme işlemleri
     List<Product> findProductsByName(String name);
-    
-    List<Product> findProductsByCategory(String categoryName);
-    
+
     List<Product> findProductsBelowQuantity(Integer quantity);
     
     List<Product> findProductsInPriceRange(Double minPrice, Double maxPrice);
-    
-    // Kritik stok seviyesindeki ürünleri bulma
-    List<Product> findLowStockProducts(int limit);
     
     // Kategoriye göre envanter değeri hesaplama
     Double calculateInventoryValueByCategory(String categoryName);
