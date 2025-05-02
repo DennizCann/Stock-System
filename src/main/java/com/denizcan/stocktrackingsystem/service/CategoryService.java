@@ -1,7 +1,6 @@
 package com.denizcan.stocktrackingsystem.service;
 
 import com.denizcan.stocktrackingsystem.model.Category;
-
 import java.util.List;
 import java.util.Optional;
 
