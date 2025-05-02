@@ -3,13 +3,11 @@ package com.denizcan.stocktrackingsystem.controller;
 import com.denizcan.stocktrackingsystem.model.Product;
 import com.denizcan.stocktrackingsystem.model.Category;
 import com.denizcan.stocktrackingsystem.service.ProductService;
-import com.denizcan.stocktrackingsystem.repository.ProductRepository;
 import com.denizcan.stocktrackingsystem.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.ArrayList;
@@ -21,7 +19,7 @@ public class ProductController {
     private final CategoryRepository categoryRepository;
 
     @Autowired
-    public ProductController(ProductService productService, ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public ProductController(ProductService productService, CategoryRepository categoryRepository) {
         this.productService = productService;
         this.categoryRepository = categoryRepository;
     }
