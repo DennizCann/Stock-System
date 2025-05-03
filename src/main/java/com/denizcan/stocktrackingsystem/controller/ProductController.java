@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import java.util.List;
 import java.util.Optional;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Controller
 public class ProductController {
@@ -25,74 +26,90 @@ public class ProductController {
     }
 
     @GetMapping("/products")
-    public String listProducts(Model model, @RequestParam(required = false) String keyword,
-                             @RequestParam(required = false) String category, 
-                             @RequestParam(required = false) String stockStatus) {
-        // Mevcut ürünleri getir - burada filtreleme için geçici çözüm
-        List<Product> products;
+    public String listProducts(Model model, 
+                              @RequestParam(required = false) String keyword,
+                              @RequestParam(required = false) String stockStatus,
+                              @RequestParam(required = false) Long categoryId) {
         
-        if (keyword != null || category != null || stockStatus != null) {
-            // Bu metot henüz tanımlanmamış, geçici olarak başka metodu kullanalım
-            products = productService.getAllProducts(); // Tüm ürünleri al
-            
-            // Sonra manuel filtreleme yapalım
-            List<Product> filteredProducts = new ArrayList<>();
-            for (Product product : products) {
-                boolean matches = true;
+        // Tüm ürünleri al ve başlangıç durumunu logla
+        List<Product> allProducts = productService.getAllProducts();
+        System.out.println("=== KATEGORİ FİLTRELEME DEBUG BİLGİSİ ===");
+        System.out.println("Toplam ürün sayısı: " + allProducts.size());
+        
+        // Kategori tiplerini logla - veritabanı durumunu anlamak için
+        System.out.println("Ürünlerin kategori tipleri:");
+        for (Product p : allProducts) {
+            System.out.println("Ürün ID: " + p.getId() + ", Adı: " + p.getName());
+            System.out.println("  Kategori: " + p.getCategory());
+            System.out.println("  Kategori Sınıfı: " + (p.getCategory() == null ? "null" : p.getCategory().getClass().getName()));
+        }
+        
+        // Eğer kategori filtrelemesi yapılıyorsa, parametreleri kontrol et
+        if (categoryId != null) {
+            System.out.println("Seçilen Kategori ID: " + categoryId);
+            Optional<Category> selectedCategoryOpt = categoryRepository.findById(categoryId);
+            if (selectedCategoryOpt.isPresent()) {
+                Category selectedCategory = selectedCategoryOpt.get();
+                System.out.println("Seçilen Kategori Adı: " + selectedCategory.getName());
                 
-                // Anahtar kelime filtresi
-                if (keyword != null && !keyword.isEmpty()) {
-                    matches = product.getName() != null && 
-                              product.getName().toLowerCase().contains(keyword.toLowerCase());
-                }
-                
-                // Kategori filtresi
-                if (matches && category != null && !category.isEmpty() && !category.equals("-- Kategori Seçin --")) {
-                    matches = product.getCategory() != null && 
-                              product.getCategory().toString().equals(category);
-                }
-                
-                // Stok durum filtresi
-                if (matches && stockStatus != null && !stockStatus.isEmpty() && !stockStatus.equals("-- Stok Durumu --")) {
-                    if (stockStatus.equals("low")) {
-                        matches = product.getQuantity() < 10; // Kritik stok seviyesi
-                    } else if (stockStatus.equals("inStock")) {
-                        matches = product.getQuantity() > 0; // Stokta var
-                    } else if (stockStatus.equals("outOfStock")) {
-                        matches = product.getQuantity() <= 0; // Stokta yok
+                // Kategoriye göre filtrelemeyi manuel olarak dene
+                List<Product> filteredByCategory = new ArrayList<>();
+                for (Product p : allProducts) {
+                    Object categoryValue = p.getCategory();
+                    boolean match = false;
+                    
+                    // Kategori değeri null kontrolü
+                    if (categoryValue == null) {
+                        System.out.println("Ürün " + p.getId() + " kategori değeri null");
+                        continue;
+                    }
+                    
+                    // Kategori tipine göre karşılaştırma yap
+                    if (categoryValue instanceof Category) {
+                        Category productCategory = (Category) categoryValue;
+                        match = productCategory.getId().equals(selectedCategory.getId());
+                        System.out.println("Ürün " + p.getId() + " kategori ID karşılaştırma: " + 
+                                          productCategory.getId() + " == " + selectedCategory.getId() + " : " + match);
+                    } else if (categoryValue instanceof String) {
+                        String categoryStr = (String) categoryValue;
+                        // String değeri kategori ID'si olarak çevirip karşılaştır
+                        try {
+                            Long categoryIdFromStr = Long.parseLong(categoryStr);
+                            match = categoryIdFromStr.equals(selectedCategory.getId());
+                            System.out.println("Ürün " + p.getId() + " kategori ID karşılaştırma (String->Long): " + 
+                                              categoryIdFromStr + " == " + selectedCategory.getId() + " : " + match);
+                        } catch (NumberFormatException e) {
+                            // Eğer sayıya çevrilemezse, bu durumda kategori adı olarak karşılaştır
+                            match = categoryStr.equalsIgnoreCase(selectedCategory.getName());
+                            System.out.println("Ürün " + p.getId() + " kategori adı karşılaştırma: " + 
+                                              categoryStr + " == " + selectedCategory.getName() + " : " + match);
+                        }
+                    } else {
+                        System.out.println("Ürün " + p.getId() + " bilinmeyen kategori tipi: " + categoryValue.getClass().getName());
+                    }
+                    
+                    if (match) {
+                        filteredByCategory.add(p);
+                        System.out.println("Ürün " + p.getId() + " filtreye eklendi");
                     }
                 }
                 
-                if (matches) {
-                    filteredProducts.add(product);
-                }
-            }
-            
-            products = filteredProducts;
-        } else {
-            products = productService.getAllProducts();
-        }
-        
-        // Kategori isimlerini ayarla
-        for (Product product : products) {
-            if (product.getCategory() != null) {
-                try {
-                    // Eğer kategori bir ID ise
-                    Long categoryId = Long.valueOf(product.getCategory().toString());
-                    // Doğrudan repository kullan
-                    Optional<Category> categoryOpt = categoryRepository.findById(categoryId);
-                    if (categoryOpt.isPresent()) {
-                        // Kategori nesnesinden ismi al ve ayarla
-                        product.setCategory(categoryOpt.get().getName());
-                    }
-                } catch (NumberFormatException e) {
-                    // Zaten string ise birşey yapma
-                }
+                System.out.println("Kategori filtresi sonrası kalan ürün sayısı: " + filteredByCategory.size());
+                // Filtrelemeyi uygula ve diğer filtrelemelere devam et
+                allProducts = filteredByCategory;
+            } else {
+                System.out.println("Seçilen kategori bulunamadı!");
             }
         }
         
-        model.addAttribute("products", products);
-        model.addAttribute("allCategories", categoryRepository.findAll());
+        // Diğer filtrelemeler (stok, anahtar kelime vs.) buraya eklenecek...
+        
+        model.addAttribute("products", allProducts);
+        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("selectedCategoryId", categoryId);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("stockStatus", stockStatus);
+        
         return "product-list";
     }
 

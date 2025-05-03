@@ -1,6 +1,7 @@
 package com.denizcan.stocktrackingsystem.repository;
 
 import com.denizcan.stocktrackingsystem.model.Product;
+import com.denizcan.stocktrackingsystem.model.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -24,4 +25,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p.id FROM Product p")
     List<Long> findAllIds();
+
+    List<Product> findByCategory(Category category);
 } 

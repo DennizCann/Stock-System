@@ -1,5 +1,6 @@
 package com.denizcan.stocktrackingsystem.service.impl;
 
+import com.denizcan.stocktrackingsystem.model.Category;
 import com.denizcan.stocktrackingsystem.model.Product;
 import com.denizcan.stocktrackingsystem.repository.ProductRepository;
 import com.denizcan.stocktrackingsystem.service.ProductService;
@@ -121,5 +122,10 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Double calculateInventoryValueByCategory(String categoryName) {
         return productRepository.calculateInventoryValueByCategoryName(categoryName);
+    }
+
+    @Override
+    public List<Product> findProductsByCategory(Category category) {
+        return productRepository.findByCategory(category);
     }
 } 

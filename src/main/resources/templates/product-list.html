@@ -34,41 +34,58 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1>Ürün Listesi</h1>
             <a href="/products/add" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Yeni Ürün Ekle
+                <i class="bi bi-plus"></i> Yeni Ürün Ekle
             </a>
         </div>
         
         <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-filter"></i> Filtreleme Seçenekleri</h5>
+            </div>
             <div class="card-body">
-                <form th:action="@{/products}" method="get" class="row">
-                    <div class="col-md-3 mb-2">
-                        <input type="text" name="keyword" class="form-control" placeholder="Ürün adı ara..." 
-                               th:value="${param.keyword}">
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <select name="category" class="form-control">
-                            <option value="">-- Kategori Seçin --</option>
-                            <option th:each="cat : ${allCategories}"
-                                    th:value="${cat.name}" 
-                                    th:text="${cat.name}"
-                                    th:selected="${param.category != null && param.category[0] == cat.name}">
-                            </option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 mb-2">
-                        <select name="stockStatus" class="form-control">
-                            <option value="">-- Stok Durumu --</option>
-                            <option value="low" th:selected="${param.stockStatus != null && param.stockStatus[0] == 'low'}">Kritik Stok (10-)</option>
-                            <option value="normal" th:selected="${param.stockStatus != null && param.stockStatus[0] == 'normal'}">Normal Stok (10+)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <button type="submit" class="btn btn-primary mr-2">
-                            <i class="fas fa-search"></i> Filtrele
-                        </button>
-                        <a th:href="@{/products}" class="btn btn-outline-secondary">
-                            <i class="fas fa-sync"></i> Sıfırla
-                        </a>
+                <form th:action="@{/products}" method="get">
+                    <div class="row align-items-end">
+                        <!-- Ürün Adı Filtresi -->
+                        <div class="col-md-3">
+                            <label for="keyword" class="form-label">Ürün Adı</label>
+                            <input type="text" class="form-control" id="keyword" name="keyword" th:value="${keyword}" placeholder="Ürün adı ara...">
+                        </div>
+                        
+                        <!-- Kategori Filtresi -->
+                        <div class="col-md-3">
+                            <label for="categoryId" class="form-label">Kategori</label>
+                            <select class="form-control" id="categoryId" name="categoryId">
+                                <option value="">Tüm Kategoriler</option>
+                                <option th:each="category : ${categories}" 
+                                        th:value="${category.id}" 
+                                        th:text="${category.name}"
+                                        th:selected="${selectedCategoryId != null && selectedCategoryId == category.id}"></option>
+                            </select>
+                        </div>
+                        
+                        <!-- Stok Durumu Filtresi -->
+                        <div class="col-md-2">
+                            <label for="stockStatus" class="form-label">Stok Durumu</label>
+                            <select class="form-control" id="stockStatus" name="stockStatus">
+                                <option value="all" th:selected="${stockStatus == null || stockStatus == 'all'}">Tümü</option>
+                                <option value="low" th:selected="${stockStatus == 'low'}">Kritik Stok (< 10)</option>
+                                <option value="normal" th:selected="${stockStatus == 'normal'}">Normal Stok (≥ 10)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Filtrele Butonu -->
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-search"></i> Filtrele
+                            </button>
+                        </div>
+                        
+                        <!-- Sıfırla Butonu -->
+                        <div class="col-md-2">
+                            <a th:href="@{/products}" class="btn btn-secondary btn-block">
+                                <i class="fas fa-sync-alt"></i> Sıfırla
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -93,7 +110,7 @@
                             <tr th:each="product : ${products}">
                                 <td th:text="${product.id}"></td>
                                 <td th:text="${product.name}"></td>
-                                <td th:text="${product.category != null ? product.category : 'Kategori Yok'}">Kategori</td>
+                                <td th:text="${product.category instanceof T(java.lang.String) ? product.category : (product.category != null ? product.category.name : '')}"></td>
                                 <td>
                                     <span th:class="${product.quantity < 10 ? 'badge badge-danger' : 'badge badge-success'}" 
                                           th:text="${product.quantity}"></span>

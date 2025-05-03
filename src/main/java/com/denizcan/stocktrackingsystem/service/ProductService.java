@@ -1,6 +1,7 @@
 package com.denizcan.stocktrackingsystem.service;
 
 import com.denizcan.stocktrackingsystem.model.Product;
+import com.denizcan.stocktrackingsystem.model.Category;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,4 +27,6 @@ public interface ProductService {
     
     // Kategoriye göre envanter değeri hesaplama
     Double calculateInventoryValueByCategory(String categoryName);
+
+    List<Product> findProductsByCategory(Category category);
 } 
