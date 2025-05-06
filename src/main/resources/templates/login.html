@@ -24,6 +24,7 @@
                         <div th:if="${param.registered}" class="alert alert-success">
                             Kayıt başarılı! Şimdi giriş yapabilirsiniz.
                         </div>
+                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
                         
                         <form th:action="@{/login}" method="post">
                             <div class="form-group">
@@ -38,7 +39,7 @@
                         </form>
                         
                         <div class="mt-3 text-center">
-                            <a th:href="@{/register}" class="btn btn-link">Yeni Hesap Oluştur</a>
+                            <a th:href="@{/register-auth}" class="btn btn-link">Yeni Hesap Oluştur</a>
                         </div>
                     </div>
                 </div>
