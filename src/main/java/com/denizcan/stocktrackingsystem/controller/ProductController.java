@@ -115,13 +115,34 @@ public class ProductController {
     @GetMapping("/products/add")
     public String showAddProductForm(Model model) {
         model.addAttribute("product", new Product());
-        model.addAttribute("categories", categoryRepository.findAll()); // Tüm kategorileri gönder
+        model.addAttribute("categories", categoryRepository.findAll());
         return "add-product";
     }
     
     @PostMapping("/products/save")
-    public String addProduct(@ModelAttribute Product product) {
+    public String addProduct(@ModelAttribute Product product, @RequestParam("category.id") Long categoryId) {
+        // Debug: id'nin null olup olmadığını kontrol et
+        System.out.println("Yeni ürün ekleniyor, id: " + product.getId());
+        // id burada null olmalı!
+        Category category = categoryRepository.findById(categoryId).orElse(null);
+        product.setCategory(category);
         productService.saveProduct(product);
         return "redirect:/products";
+    }
+
+    @PostMapping("/products/update")
+    public String updateProduct(@ModelAttribute Product product, @RequestParam("category.id") Long categoryId) {
+        Category category = categoryRepository.findById(categoryId).orElse(null);
+        product.setCategory(category);
+        productService.updateProduct(product);
+        return "redirect:/products";
+    }
+
+    @GetMapping("/products/edit/{id}")
+    public String showEditProductForm(@PathVariable Long id, Model model) {
+        Product product = productService.getProductById(id).orElseThrow();
+        model.addAttribute("product", product);
+        model.addAttribute("categories", categoryRepository.findAll());
+        return "edit-product";
     }
 } 

@@ -1,97 +1,88 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Ürün Stok Hareketleri</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-</head>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/default :: html}">
 <body>
-    <!-- Header'ı dahil et -->
-    <div th:replace="fragments/header :: header"></div>
-
-    <div class="container mt-4">
-        <div class="row mb-3">
-            <div class="col-md-8">
-                <h2>
-                    <i class="fas fa-exchange-alt"></i> 
-                    <span th:text="${product.name}"></span> - Stok Hareketleri
-                </h2>
-                <div class="badge badge-info">
-                    Mevcut Stok: <span th:text="${product.quantity}"></span>
-                </div>
-            </div>
-            <div class="col-md-4 text-right">
-                <a th:href="@{/stock-movements/add}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Yeni Stok Hareketi
-                </a>
-                <a th:href="@{/stock-movements}" class="btn btn-secondary">
-                    <i class="fas fa-list"></i> Tüm Hareketler
-                </a>
-            </div>
-        </div>
-        
-        <!-- Ürün bilgileri kartı -->
-        <div class="card mb-4">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Ürün Bilgileri</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Ürün Adı:</strong> <span th:text="${product.name}"></span></p>
-                        <p><strong>Açıklama:</strong> <span th:text="${product.description ?: 'Belirtilmemiş'}"></span></p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Mevcut Stok:</strong> <span th:text="${product.quantity}"></span></p>
-                        <p><strong>Fiyat:</strong> <span th:text="${product.price}"></span> TL</p>
+    <div th:fragment="content">
+        <div class="container mt-4">
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <h2>
+                        <i class="fas fa-exchange-alt"></i> 
+                        <span th:text="${product.name}"></span> - Stok Hareketleri
+                    </h2>
+                    <div class="badge badge-info">
+                        Mevcut Stok: <span th:text="${product.quantity}"></span>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Stok hareketleri tablosu -->
-        <div class="card">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Stok Hareketleri</h5>
-            </div>
-            <div class="card-body">
-                <div th:if="${movements.empty}" class="alert alert-info">
-                    Bu ürün için kayıtlı stok hareketi bulunamadı.
+                <div class="col-md-4 text-right">
+                    <a th:href="@{/stock-movements/add}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Yeni Stok Hareketi
+                    </a>
+                    <a th:href="@{/stock-movements}" class="btn btn-secondary">
+                        <i class="fas fa-list"></i> Tüm Hareketler
+                    </a>
                 </div>
-                
-                <table th:if="${!movements.empty}" class="table table-striped table-hover">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th>#</th>
-                            <th>Miktar</th>
-                            <th>Hareket Türü</th>
-                            <th>Tarih/Saat</th>
-                            <th>Sonuç Stok</th>
-                            <th>Not</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="movement : ${movements}">
-                            <td th:text="${movement.id}"></td>
-                            <td th:text="${movement.quantity}"></td>
-                            <td>
-                                <span th:if="${movement.movementType == 'IN'}" class="badge badge-success">Giriş</span>
-                                <span th:if="${movement.movementType == 'OUT'}" class="badge badge-danger">Çıkış</span>
-                                <span th:if="${movement.movementType == 'RETURN'}" class="badge badge-info">İade</span>
-                            </td>
-                            <td th:text="${#temporals.format(movement.timestamp, 'dd.MM.yyyy HH:mm')}"></td>
-                            <td th:text="${movement.resultingStock}"></td>
-                            <td th:text="${movement.note ?: '-'}"></td>
-                        </tr>
-                    </tbody>
-                </table>
+            </div>
+            
+            <!-- Ürün bilgileri kartı -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Ürün Bilgileri</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Ürün Adı:</strong> <span th:text="${product.name}"></span></p>
+                            <p><strong>Açıklama:</strong> <span th:text="${product.description ?: 'Belirtilmemiş'}"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Mevcut Stok:</strong> <span th:text="${product.quantity}"></span></p>
+                            <p><strong>Fiyat:</strong> <span th:text="${product.price}"></span> TL</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stok hareketleri tablosu -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Stok Hareketleri</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${movements.empty}" class="alert alert-info">
+                        Bu ürün için kayıtlı stok hareketi bulunamadı.
+                    </div>
+                    
+                    <table th:if="${!movements.empty}" class="table table-striped table-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Miktar</th>
+                                <th>Hareket Türü</th>
+                                <th>Tarih/Saat</th>
+                                <th>Sonuç Stok</th>
+                                <th>Not</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="movement : ${movements}">
+                                <td th:text="${movement.id}"></td>
+                                <td th:text="${movement.quantity}"></td>
+                                <td>
+                                    <span th:if="${movement.movementType == 'IN'}" class="badge badge-success">Giriş</span>
+                                    <span th:if="${movement.movementType == 'OUT'}" class="badge badge-danger">Çıkış</span>
+                                    <span th:if="${movement.movementType == 'RETURN'}" class="badge badge-info">İade</span>
+                                </td>
+                                <td th:text="${#temporals.format(movement.timestamp, 'dd.MM.yyyy HH:mm')}"></td>
+                                <td th:text="${movement.resultingStock}"></td>
+                                <td th:text="${movement.note ?: '-'}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-    
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -51,22 +51,6 @@ public class WebController {
         }
     }
 
-    // Ürün düzenleme sayfası
-    @GetMapping("/products/edit/{id}")
-    public String showEditProductForm(@PathVariable Long id, Model model) {
-        productService.getProductById(id).ifPresent(product -> model.addAttribute("product", product));
-        model.addAttribute("categories", categoryService.getAllCategories());
-        return "edit-product";
-    }
-
-    // Ürün güncelleme işlemi
-    @PostMapping("/products/update")
-    public String updateProduct(@ModelAttribute Product product) {
-        // Form gönderildiğinde ürünü doğrudan güncelle
-        productService.updateProduct(product);
-        return "redirect:/products";
-    }
-
     // Ürün silme işlemi
     @GetMapping("/products/delete/{id}")
     public String deleteProduct(@PathVariable Long id) {
