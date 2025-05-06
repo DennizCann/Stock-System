@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Kullanıcı Listesi</title>
+</head>
+<body>
+<div class="container mt-4">
+    <h2>Kullanıcılar</h2>
+    <a th:href="@{/admin/users/add}" class="btn btn-primary mb-3">Yeni Kullanıcı Ekle</a>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Kullanıcı Adı</th>
+                <th>Ad Soyad</th>
+                <th>E-posta</th>
+                <th>Rol</th>
+                <th>Aktif</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="u : ${users}">
+                <td th:text="${u.username}"></td>
+                <td th:text="${u.fullName}"></td>
+                <td th:text="${u.email}"></td>
+                <td th:text="${u.role}"></td>
+                <td>
+                    <span th:text="${u.active ? 'Evet' : 'Hayır'}"></span>
+                </td>
+                <td>
+                    <a th:href="@{/admin/users/edit/{id}(id=${u.id})}" class="btn btn-sm btn-warning">Düzenle</a>
+                    <a th:href="@{/admin/users/delete/{id}(id=${u.id})}" class="btn btn-sm btn-danger"
+                       onclick="return confirm('Kullanıcıyı silmek istediğinize emin misiniz?')">Sil</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html> 

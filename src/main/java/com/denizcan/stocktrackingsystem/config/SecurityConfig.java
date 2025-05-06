@@ -20,6 +20,8 @@ public class SecurityConfig {
                 .requestMatchers("/register").permitAll()
                 .requestMatchers("/api/**").hasRole("ADMIN")
                 .requestMatchers("/categories/**").hasRole("ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/manager/**").hasRole("MANAGER")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

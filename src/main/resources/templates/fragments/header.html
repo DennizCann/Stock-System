@@ -33,6 +33,12 @@
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/reports/stock}"><i class="fas fa-chart-bar"></i> Raporlar</a>
                     </li>
+                    <!-- Sadece adminler için kullanıcı yönetimi -->
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" th:href="@{/admin/users}">
+                            <i class="fas fa-users-cog"></i> Kullanıcılar
+                        </a>
+                    </li>
                 </ul>
                 
                 <!-- Kullanıcı profil ve çıkış bölümü -->

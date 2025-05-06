@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class LoginController {
@@ -29,16 +30,10 @@ public class LoginController {
     }
     
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute User user) {
-        // Şifreyi hashleme
+    public String registerUser(@ModelAttribute User user, @RequestParam("role") String role) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        
-        // Varsayılan olarak kullanıcı rolü atama
-        user.setRole("ROLE_USER");
-        
-        // Kullanıcıyı kaydetme
+        user.setRole(role);
         userRepository.save(user);
-        
         return "redirect:/login?registered";
     }
 } 

@@ -32,6 +32,15 @@
                                 <label for="email">E-posta Adresi</label>
                                 <input type="email" id="email" name="email" class="form-control" required>
                             </div>
+                            <div class="form-group">
+                                <label for="role">Rol</label>
+                                <select id="role" name="role" class="form-control" required>
+                                    <option value="">-- Rol Seçin --</option>
+                                    <option value="ROLE_ADMIN">Yönetici (Admin)</option>
+                                    <option value="ROLE_MANAGER">Yönetici Yardımcısı (Manager)</option>
+                                    <option value="ROLE_USER">Kullanıcı (User)</option>
+                                </select>
+                            </div>
                             <button type="submit" class="btn btn-primary btn-block">Kayıt Ol</button>
                         </form>
                         
