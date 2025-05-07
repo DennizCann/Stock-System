@@ -13,15 +13,13 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>İsim</th>
+                        <th>Kategori Adı</th>
                         <th>Açıklama</th>
                         <th>İşlemler</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="category : ${categories}">
-                        <td th:text="${category.id}"></td>
                         <td th:text="${category.name}"></td>
                         <td th:text="${category.description}"></td>
                         <td>

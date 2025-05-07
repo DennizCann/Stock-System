@@ -28,7 +28,6 @@
                     <table class="table table-striped table-hover">
                         <thead class="thead-dark">
                             <tr>
-                                <th>ID</th>
                                 <th>Ürün Adı</th>
                                 <th>Kategori</th>
                                 <th>Fiyat</th>
@@ -38,10 +37,9 @@
                         </thead>
                         <tbody>
                             <tr th:each="product : ${products}">
-                                <td th:text="${product.id}"></td>
                                 <td th:text="${product.name}"></td>
-                                <td th:text="${product.category}"></td>
-                                <td th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' TL'}"></td>
+                                <td th:text="${product.category != null ? product.category.name : '-'}"></td>
+                                <td th:text="${#numbers.formatDecimal(product.price, 2, 2) + ' TL'}"></td>
                                 <td>
                                     <span th:class="${product.quantity < 10 ? 'badge badge-danger' : 'badge badge-success'}"
                                           th:text="${product.quantity}"></span>

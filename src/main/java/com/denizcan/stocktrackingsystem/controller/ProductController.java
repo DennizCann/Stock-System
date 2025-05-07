@@ -120,11 +120,9 @@ public class ProductController {
     }
 
     @PostMapping("/products/save")
-    public String addProduct(@ModelAttribute Product product, @RequestParam("category.id") Long categoryId) {
-        // Debug: id'nin null olup olmadığını kontrol et
-        System.out.println("Yeni ürün ekleniyor, id: " + product.getId());
-        // id burada null olmalı!
-        Category category = categoryRepository.findById(categoryId).orElse(null);
+    public String saveProduct(@ModelAttribute Product product, @RequestParam("category.id") Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+            .orElseThrow(() -> new RuntimeException("Kategori bulunamadı!"));
         product.setCategory(category);
         productService.saveProduct(product);
         return "redirect:/products";
