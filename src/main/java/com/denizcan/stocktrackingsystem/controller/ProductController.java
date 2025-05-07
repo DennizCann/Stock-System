@@ -143,4 +143,18 @@ public class ProductController {
         model.addAttribute("categories", categoryRepository.findAll());
         return "edit-product";
     }
+
+    @GetMapping("/products/search")
+    public String searchProducts(@RequestParam("keyword") String keyword, Model model) {
+        List<Product> products;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            products = productService.findProductsByName(keyword);
+        } else {
+            products = productService.getAllProducts();
+        }
+        model.addAttribute("products", products);
+        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("keyword", keyword);
+        return "product-list"; // veya ürün listeleme sayfanızın adı neyse
+    }
 } 
