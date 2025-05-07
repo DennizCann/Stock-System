@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Kategori Ekle</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Yeni Kategori Ekle</h2>
+    <form action="/categories/save" method="post">
+        <div class="form-group">
+            <label for="name">Kategori Adı</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Açıklama</label>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+        <a href="/categories" class="btn btn-secondary">İptal</a>
+    </form>
+</div>
+</body>
+</html> 

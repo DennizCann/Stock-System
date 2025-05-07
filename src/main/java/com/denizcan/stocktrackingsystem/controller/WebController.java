@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.ArrayList;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class WebController {
@@ -134,5 +135,12 @@ public class WebController {
     @GetMapping("/access-denied")
     public String accessDenied() {
         return "access-denied";
+    }
+
+    @PostMapping("/categories/save")
+    public String saveCategory(@ModelAttribute Category category, RedirectAttributes redirectAttributes) {
+        categoryService.saveCategory(category);
+        redirectAttributes.addFlashAttribute("successMessage", "Kategori başarıyla eklendi.");
+        return "redirect:/categories";
     }
 } 

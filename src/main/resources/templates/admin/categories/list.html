@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Kategori Listesi</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css">
+    <style>
+        ul.category-tree { list-style-type: none; }
+        ul.category-tree ul { margin-left: 20px; }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Kategoriler</h2>
+    <a th:href="@{/admin/categories/add}" class="btn btn-success mb-3">Yeni Kategori Ekle</a>
+    <ul class="category-tree">
+        <li th:each="cat : ${categories}" th:if="${cat.parent == null}">
+            <span th:text="${cat.name}"></span>
+            <ul th:if="${#lists.size(cat.children) > 0}">
+                <li th:each="child : ${cat.children}">
+                    <span th:text="${child.name}"></span>
+                    <ul th:if="${#lists.size(child.children) > 0}">
+                        <li th:each="sub : ${child.children}">
+                            <span th:text="${sub.name}"></span>
+                            <!-- Daha fazla derinlik için recursive olarak devam edebilirsin -->
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+</body>
+</html> 
