@@ -24,8 +24,13 @@ public class StockMovementController {
     
     // Tüm stok hareketlerini listele
     @GetMapping
-    public String listAllMovements(Model model) {
-        List<StockMovement> movements = stockMovementRepository.findAll();
+    public String listStockMovements(@RequestParam(value = "movementType", required = false) String movementType, Model model) {
+        List<StockMovement> movements;
+        if (movementType != null && !movementType.isBlank()) {
+            movements = stockMovementRepository.findByMovementTypeOrderByTimestampDesc(movementType);
+        } else {
+            movements = stockMovementRepository.findAll();
+        }
         model.addAttribute("movements", movements);
         return "stock-movements/list";
     }
