@@ -25,7 +25,6 @@ public class ProfileController {
 
     @GetMapping("/profile")
     public String profilePage(Model model) {
-        // Mevcut kullanıcı bilgilerini al
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
         User user = userRepository.findByUsername(currentUsername).orElse(null);
@@ -35,65 +34,41 @@ public class ProfileController {
     }
 
     @PostMapping("/profile/update")
-    public String updateProfile(@ModelAttribute User updatedUser, RedirectAttributes redirectAttributes) {
-        // Mevcut kullanıcıyı al
+    public String updateProfile(
+            @ModelAttribute User updatedUser,
+            @RequestParam(value = "currentPassword", required = false) String currentPassword,
+            @RequestParam(value = "newPassword", required = false) String newPassword,
+            @RequestParam(value = "confirmPassword", required = false) String confirmPassword,
+            RedirectAttributes redirectAttributes) {
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
         User currentUser = userRepository.findByUsername(currentUsername).orElse(null);
 
         if (currentUser != null) {
-            // Güncellenemeyecek alanlar
-            updatedUser.setId(currentUser.getId());
-            updatedUser.setUsername(currentUser.getUsername());
-            updatedUser.setPassword(currentUser.getPassword());
-            updatedUser.setRole(currentUser.getRole());
-            updatedUser.setActive(currentUser.isActive());
-            
-            // Güncellenebilir alanlar
+            // Profil bilgilerini güncelle
             currentUser.setFullName(updatedUser.getFullName());
             currentUser.setEmail(updatedUser.getEmail());
-            
+
+            // Şifre değiştirme isteği varsa
+            if (newPassword != null && !newPassword.isBlank()) {
+                if (currentPassword == null || !passwordEncoder.matches(currentPassword, currentUser.getPassword())) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Mevcut şifreniz yanlış!");
+                    return "redirect:/profile";
+                }
+                if (!newPassword.equals(confirmPassword)) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Yeni şifreler eşleşmiyor!");
+                    return "redirect:/profile";
+                }
+                currentUser.setPassword(passwordEncoder.encode(newPassword));
+            }
+
             userRepository.save(currentUser);
             redirectAttributes.addFlashAttribute("successMessage", "Profil bilgileriniz başarıyla güncellendi.");
         } else {
             redirectAttributes.addFlashAttribute("errorMessage", "Kullanıcı bulunamadı.");
         }
-        
-        return "redirect:/profile";
-    }
-    
-    @PostMapping("/profile/change-password")
-    public String changePassword(@RequestParam("currentPassword") String currentPassword,
-                                 @RequestParam("newPassword") String newPassword,
-                                 @RequestParam("confirmPassword") String confirmPassword,
-                                 RedirectAttributes redirectAttributes) {
-        
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
-        User user = userRepository.findByUsername(currentUsername).orElse(null);
-        
-        if (user != null) {
-            // Mevcut şifreyi kontrol et
-            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-                redirectAttributes.addFlashAttribute("passwordError", "Mevcut şifre doğru değil.");
-                return "redirect:/profile";
-            }
-            
-            // Yeni şifre ve onay şifresini kontrol et
-            if (!newPassword.equals(confirmPassword)) {
-                redirectAttributes.addFlashAttribute("passwordError", "Yeni şifre ve onay şifresi eşleşmiyor.");
-                return "redirect:/profile";
-            }
-            
-            // Şifreyi güncelle
-            user.setPassword(passwordEncoder.encode(newPassword));
-            userRepository.save(user);
-            
-            redirectAttributes.addFlashAttribute("passwordSuccess", "Şifreniz başarıyla değiştirildi.");
-        } else {
-            redirectAttributes.addFlashAttribute("passwordError", "Kullanıcı bulunamadı.");
-        }
-        
+
         return "redirect:/profile";
     }
 } 
