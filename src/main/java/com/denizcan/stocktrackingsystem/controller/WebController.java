@@ -82,9 +82,16 @@ public class WebController {
 
     // Kategori düzenleme sayfası
     @GetMapping("/categories/edit/{id}")
-    public String showEditCategoryForm(@PathVariable Long id, Model model) {
-        categoryService.getCategoryById(id).ifPresent(category -> model.addAttribute("category", category));
-        return "edit-category";
+    public String showEditCategoryForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        return categoryService.getCategoryById(id)
+            .map(category -> {
+                model.addAttribute("category", category);
+                return "edit-category";
+            })
+            .orElseGet(() -> {
+                redirectAttributes.addFlashAttribute("errorMessage", "Kategori bulunamadı!");
+                return "redirect:/categories";
+            });
     }
 
     // Kategori güncelleme işlemi
