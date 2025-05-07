@@ -16,14 +16,12 @@
         <thead>
             <tr>
                 <th>Kategori Adı</th>
-                <th>Açıklama</th>
                 <th>İşlemler</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="cat : ${categories}">
                 <td th:text="${cat.name}"></td>
-                <td th:text="${cat.description}"></td>
                 <td>
                     <!-- İşlem butonları -->
                 </td>

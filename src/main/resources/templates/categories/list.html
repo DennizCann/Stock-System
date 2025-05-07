@@ -14,14 +14,12 @@
                 <thead>
                     <tr>
                         <th>Kategori Adı</th>
-                        <th>Açıklama</th>
                         <th>İşlemler</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="category : ${categories}">
                         <td th:text="${category.name}"></td>
-                        <td th:text="${category.description}"></td>
                         <td>
                             <a th:href="@{/categories/edit/{id}(id=${category.id})}" class="btn btn-sm btn-warning">Düzenle</a>
                             <a th:href="@{/categories/delete/{id}(id=${category.id})}" class="btn btn-sm btn-danger"

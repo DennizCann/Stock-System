@@ -60,7 +60,6 @@ public class DataMigrationRunner implements CommandLineRunner {
                     if (category == null) {
                         category = new Category();
                         category.setName(categoryName);
-                        category.setDescription("Otomatik oluşturuldu");
                         categoryRepository.save(category);
                     }
                     

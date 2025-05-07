@@ -20,8 +20,6 @@ public class Category {
     
     private String name;
     
-    private String description;
-    
     // Bu kategori altındaki ürünler (isteğe bağlı)
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     @JsonIgnore // Sonsuz döngüyü önlemek için

@@ -30,6 +30,7 @@
                             <tr>
                                 <th>Ürün Adı</th>
                                 <th>Kategori</th>
+                                <th>Açıklama</th>
                                 <th>Fiyat</th>
                                 <th>Stok</th>
                                 <th>İşlemler</th>
@@ -39,6 +40,7 @@
                             <tr th:each="product : ${products}">
                                 <td th:text="${product.name}"></td>
                                 <td th:text="${product.category != null ? product.category.name : '-'}"></td>
+                                <td th:text="${product.description}"></td>
                                 <td th:text="${#numbers.formatDecimal(product.price, 2, 2) + ' TL'}"></td>
                                 <td>
                                     <span th:class="${product.quantity < 10 ? 'badge badge-danger' : 'badge badge-success'}"
