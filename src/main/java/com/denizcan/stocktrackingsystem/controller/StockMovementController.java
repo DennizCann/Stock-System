@@ -2,34 +2,36 @@ package com.denizcan.stocktrackingsystem.controller;
 
 import com.denizcan.stocktrackingsystem.model.Product;
 import com.denizcan.stocktrackingsystem.model.StockMovement;
-import com.denizcan.stocktrackingsystem.repository.StockMovementRepository;
 import com.denizcan.stocktrackingsystem.service.ProductService;
+import com.denizcan.stocktrackingsystem.service.StockMovementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
 @RequestMapping("/stock-movements")
 public class StockMovementController {
 
+    private final StockMovementService stockMovementService;
+    private final ProductService productService;
+
     @Autowired
-    private StockMovementRepository stockMovementRepository;
-    
-    @Autowired
-    private ProductService productService;
+    public StockMovementController(StockMovementService stockMovementService, ProductService productService) {
+        this.stockMovementService = stockMovementService;
+        this.productService = productService;
+    }
     
     // Tüm stok hareketlerini listele
     @GetMapping
     public String listStockMovements(@RequestParam(value = "movementType", required = false) String movementType, Model model) {
         List<StockMovement> movements;
         if (movementType != null && !movementType.isBlank()) {
-            movements = stockMovementRepository.findByMovementTypeOrderByTimestampDesc(movementType);
+            movements = stockMovementService.getStockMovementsByType(movementType);
         } else {
-            movements = stockMovementRepository.findAll();
+            movements = stockMovementService.getAllStockMovements();
         }
         model.addAttribute("movements", movements);
         return "stock-movements/list";
@@ -48,46 +50,9 @@ public class StockMovementController {
     @PostMapping("/add")
     public String addMovement(@ModelAttribute StockMovement movement, RedirectAttributes redirectAttributes) {
         try {
-            // Ürünü bul
-            Product product = productService.getProductById(movement.getProduct().getId())
-                    .orElseThrow(() -> new RuntimeException("Ürün bulunamadı"));
-            
-            // Mevcut stok miktarını al
-            Integer currentStock = product.getQuantity();
-            Integer quantity = movement.getQuantity();
-            
-            // Hareket tipine göre stok miktarını güncelle
-            if ("IN".equals(movement.getMovementType())) {
-                // Stok girişi
-                product.setQuantity(currentStock + quantity);
-            } else if ("OUT".equals(movement.getMovementType())) {
-                // Stok çıkışı (satış)
-                if (currentStock < quantity) {
-                    redirectAttributes.addFlashAttribute("errorMessage", 
-                            "Yetersiz stok! Mevcut: " + currentStock + ", İstenen: " + quantity);
-                    return "redirect:/stock-movements/add";
-                }
-                product.setQuantity(currentStock - quantity);
-            } else if ("RETURN".equals(movement.getMovementType())) {
-                // İade (stok artışı)
-                product.setQuantity(currentStock + quantity);
-            }
-            
-            // Ürünü güncelle
-            productService.updateProduct(product);
-            
-            // Hareket sonrası kalan stok miktarını kaydet
-            movement.setResultingStock(product.getQuantity());
-            
-            // Zaman damgası ekle
-            movement.setTimestamp(LocalDateTime.now());
-            
-            // Stok hareketini kaydet
-            stockMovementRepository.save(movement);
-            
+            stockMovementService.addStockMovement(movement);
             redirectAttributes.addFlashAttribute("successMessage", "Stok hareketi başarıyla kaydedildi.");
             return "redirect:/stock-movements";
-            
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Hata: " + e.getMessage());
             return "redirect:/stock-movements/add";
@@ -100,7 +65,7 @@ public class StockMovementController {
         Product product = productService.getProductById(productId)
                 .orElseThrow(() -> new RuntimeException("Ürün bulunamadı"));
         
-        List<StockMovement> movements = stockMovementRepository.findByProductIdOrderByTimestampDesc(productId);
+        List<StockMovement> movements = stockMovementService.getStockMovementsByProduct(productId);
         
         model.addAttribute("product", product);
         model.addAttribute("movements", movements);
